@@ -11,7 +11,7 @@ description: "How to Locally Debug a ASP.Net Core Web API that Receives Messages
 urlFragment: azeventgrid-local-debug-aspnet-core-ngrok
 ---
 
-# How to Locally Debug a ```ASP.Net`` Core Web API that Receives Messages from Azure EventGrid
+# How to Locally Debug a ```ASP.Net``` Core Web API that Receives Messages from Azure EventGrid
 
 This tutorial demonstrates how to debug a ```ASP.Net``` Core Web API endpoint that receives messages when a new blob is created in an Azure Blob Storage Account.
 
