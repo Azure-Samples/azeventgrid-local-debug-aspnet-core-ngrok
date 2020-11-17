@@ -2,13 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Azure.Messaging.EventGrid;
+using Azure.Messaging.EventGrid.SystemEvents;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.EventGrid;
-using Microsoft.Azure.EventGrid.Models;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace azeventgrid.ngrok.webapi.Controllers
 {
@@ -29,19 +28,16 @@ namespace azeventgrid.ngrok.webapi.Controllers
                 using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
                 {
                     var jsonContent = await reader.ReadToEndAsync();
-                    var eventGridEvents = JsonConvert.DeserializeObject<List<EventGridEvent>>(jsonContent);
+                    var eventGridEvents = JsonSerializer.Deserialize<List<EventGridEvent>>(jsonContent);
 
                     foreach (var eventGridEvent in eventGridEvents)
                     {
                         // EventGrid validation message
-                        if (eventGridEvent.EventType == EventTypes.EventGridSubscriptionValidationEvent)
+                        if (eventGridEvent.EventType == "Microsoft.EventGrid.SubscriptionValidationEvent")
                         {
-                            var eventData = ((JObject)(eventGridEvent.Data)).ToObject<SubscriptionValidationEventData>();
-                            var responseData = new SubscriptionValidationResponse()
-                            {
-                                ValidationResponse = eventData.ValidationCode
-                            };
-                            return Ok(responseData);
+                            var eventData = eventGridEvent.GetData<SubscriptionValidationEventData>();
+
+                            return Ok(eventData.ValidationCode);
                         }
                         // handle all other events
                         await this.HandleEvent(eventGridEvent);
@@ -58,7 +54,7 @@ namespace azeventgrid.ngrok.webapi.Controllers
         }
         private async Task<IActionResult> HandleEvent(EventGridEvent eventGridEvent)
         {
-            if (eventGridEvent.EventType == EventTypes.StorageBlobCreatedEvent)
+            if (eventGridEvent.EventType == "Microsoft.Storage.BlobCreated")
             {
                 // do something
             }
