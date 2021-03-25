@@ -28,14 +28,17 @@ namespace azeventgrid.ngrok.webapi.Controllers
                 using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
                 {
                     var jsonContent = await reader.ReadToEndAsync();
-                    var eventGridEvents = EventGridEvent.Parse(jsonContent);
+                    var eventGridEvents = EventGridEvent.ParseMany(BinaryData.FromString(jsonContent));
 
                     foreach (var egEvent in eventGridEvents)
                     {
-                        // EventGrid validation message
-                        if (egEvent.GetData() is SubscriptionValidationEventData subscriptionData)
+                        if (egEvent.TryGetSystemEventData(out object data))
                         {
-                            return Ok(subscriptionData.ValidationCode);
+                            // EventGrid validation message
+                            if (data is SubscriptionValidationEventData subscriptionData)
+                            {
+                                return Ok(subscriptionData.ValidationCode);
+                            }
                         }
                         // handle all other events
                         await this.HandleEvent(egEvent);
