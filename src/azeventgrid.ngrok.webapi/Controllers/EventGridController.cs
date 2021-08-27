@@ -35,7 +35,11 @@ namespace azeventgrid.ngrok.webapi.Controllers
                             // EventGrid validation message
                             if (data is SubscriptionValidationEventData subscriptionData)
                             {
-                                return Ok(subscriptionData.ValidationCode);
+                                var responseData = new SubscriptionValidationResponse()
+                                {
+                                    ValidationResponse = subscriptionData.ValidationCode
+                                };
+                                return Ok(responseData);
                             }
                         }
                         // handle all other events
@@ -44,7 +48,7 @@ namespace azeventgrid.ngrok.webapi.Controllers
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 result = new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
@@ -53,7 +57,7 @@ namespace azeventgrid.ngrok.webapi.Controllers
         }
         private async Task<IActionResult> HandleEvent(EventGridEvent eventGridEvent)
         {
-            if (eventGridEvent.EventType == "Microsoft.Storage.BlobCreated")
+            if (eventGridEvent.EventType == SystemEventNames.StorageBlobCreated)
             {
                 // do something
             }
